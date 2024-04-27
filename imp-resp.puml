@@ -1,0 +1,36 @@
+@startuml
+title imp-resp
+
+participant Frontend as FE
+participant "proxy: mapping" as map
+participant "Description Generator" as DG
+participant "RatingAPI" as Rate
+
+FE -> map: GET /description-generation/{task_id}
+activate FE
+activate map
+autonumber
+
+loop
+    map -> DG: GET /description-generation/{task_id}
+    activate DG
+    DG --> map: generatedDescription.json
+    deactivate DG
+    map -> Rate: POST /api/v2/analyze/description
+    activate Rate
+    Rate --> map: Responce
+    deactivate Rate
+
+    break Success Response
+        
+        map --> FE: generatedDescription.json
+    else Bad Response and Attempt >= 3 
+        
+        map --> FE: К сожалению, мы не смогли обработать ваш запрос
+        deactivate FE
+        deactivate map
+    end
+end
+
+@enduml
+
