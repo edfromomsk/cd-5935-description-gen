@@ -1,0 +1,38 @@
+@startuml
+autonumber
+
+participant FE
+participant mapping
+participant DesсriptionGenerator
+
+activate FE
+FE -> mapping: POST .../description-generation
+activate mapping
+mapping -> mapping: auth
+mapping -> DesсriptionGenerator: POST /description-generation
+
+alt Success
+    DesсriptionGenerator -->> mapping: task_id
+    mapping -->> FE: task_id
+else Error
+    DesсriptionGenerator -->> mapping: {"errorText": "The data contains words that are considered unsafe or banned."}
+    mapping -->> FE: {"errorText": "The data contains words that are considered unsafe or banned."}
+end
+
+FE -> mapping: GET .../description-generation/{task_id}
+mapping -> DesсriptionGenerator: GET .../description-generation/{task_id}
+
+alt Success
+    DesсriptionGenerator -->> mapping: generatedDescription.json
+    mapping -->> FE: generatedDescription.json
+else Unsafe or Banned Words
+    DesсriptionGenerator -->> mapping: {"errorText": "The data contains words that are considered unsafe or banned."}
+    mapping -->> FE: {"errorText": "The data contains words that are considered unsafe or banned."}
+else Presence of Hieroglyphs
+    DesсriptionGenerator -->> mapping: {"errorText": "The data contains hieroglyphs."}
+    mapping -->> FE: {"errorText": "The data contains hieroglyphs."}
+end
+
+deactivate mapping
+deactivate FE
+@enduml
