@@ -6,7 +6,7 @@ participant Frontend as FE
 participant "proxy: mapping" as map
 participant "Description Generator" as DG
 
-FE -> map: POST .../description-generation
+FE -> map: POST /description-generation
 activate FE
 activate map
 map -> map: auth
@@ -21,7 +21,7 @@ else Error
     map -->> FE: {"errorText": "The data contains words that are considered unsafe or banned."}
 end
 
-FE -> map: GET .../description-generation/{task_id}
+FE -> map: GET /description-generation/{task_id}
 map -> DG: GET /description-generation/{task_id}
 
 alt Success
